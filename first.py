@@ -4,6 +4,7 @@ import functools
 import threading
 import psutil
 import os
+import random
 
 
 def timeit(func):
@@ -93,7 +94,7 @@ def memoryit(func):
 
 @timeit
 @memoryit
-def symmetric_difference(input_str: str) -> str:
+def symmetric_difference(input_str: str) -> str:  # 2c, 64мб
     set_a = []  # Множество A
     set_b = []  # Множество B
     result = []
@@ -140,7 +141,7 @@ def symmetric_difference(input_str: str) -> str:
 
 @timeit
 @memoryit
-def long_a_s(first_operand: str, operator: str, second_operator: str) -> str:
+def long_a_s(first_operand: str, operator: str, second_operator: str) -> str:  # 2c, 64мб
     if operator == "+":
         return int(first_operand) + int(second_operator)
     elif operator == "-":
@@ -149,17 +150,55 @@ def long_a_s(first_operand: str, operator: str, second_operator: str) -> str:
         pass  # Место для новых операторов
 
 
-print(long_a_s('1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890', '+', '9876543210987654321098765432109876543210987654321098765432109876543210987654321098765432109876543210'))
-print(long_a_s('9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999', '-', '1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111'))
-print(long_a_s('5000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000', '+', '5000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'))
-print(long_a_s('1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000', '-', '1'))
-print(long_a_s('2468135790246813579024681357902468135790246813579024681357902468135790246813579024681357902468135790', '+', '7531986420753198642075319864207531986420753198642075319864207531986420753198642075319864207531986420'))
+print(long_a_s(str(random.randint(-1000, 1000)), random.choice(['+', '-']), str(random.randint(-1000, 1000))))
 
 
 @timeit
 @memoryit
-def maharajah(size: int, amount: int) -> int:
+def maharajah(size: int, amount: int) -> int:  # 1c, 16мб
     pass
+
+
+numbers = [str(random.randint(0, 200000)) for _ in range(10000)]
+nums_str = " ".join(numbers)
+
+@timeit
+@memoryit
+def broken_search(target: int, nums: str) -> int:  # 0.001c, 64мб
+    nums = nums.split(' ')
+    target = str(target)
+
+    try:
+        return nums.index(target)
+    except ValueError:
+        return -1
+
+print(broken_search(random.randint, nums_str))
+
+
+@timeit
+@memoryit  # 2c, 64мб
+def mfs(records_amount, ) -> :
+    pass
+
+
+@timeit
+@memoryit
+def () -> :  # 1.5c, 512мб
+    pass
+
+
+@timeit
+@memoryit
+def () -> :  # 1c, 16мб
+    pass
+
+
+@timeit
+@memoryit
+def () -> :  # 1.5c, 256мб
+    pass
+
 
 @timeit
 @memoryit
@@ -169,35 +208,5 @@ def () -> :
 
 @timeit
 @memoryit
-def () -> :
-    pass
-
-
-@timeit
-@memoryit
-def () -> :
-    pass
-
-
-@timeit
-@memoryit
-def () -> :
-    pass
-
-
-@timeit
-@memoryit
-def () -> :
-    pass
-
-
-@timeit
-@memoryit
-def () -> :
-    pass
-
-
-@timeit
-@memoryit
-def () -> :
+def () -> :  # 1c, 64мб
     pass
