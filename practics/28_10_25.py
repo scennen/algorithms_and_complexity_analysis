@@ -1,37 +1,124 @@
+class Node:
+    def __init__(self, key: int, value: int):
+        self.key: int = key
+        self.value: int = value
+        self.left: Node = None
+        self.right: Node = None
+
+
 class Tree:
-    def __init__(self, value = 0, left = None, right = None):
-        self.value = value
-        self.left = left
-        self.right = right
+    def __init__(self, node: Node):
+        self.root: Node = node
+
+    def __init__(self):
+        self.root: Node = None
+
+    def _insert(self, node: Node, key: int, value: int) -> None:
+        if key < node.key:
+            if node.left == None:
+                node.left = Node(key, value)
+            else:
+                self._insert(node.left, key, value)
+
+        elif key >= node.key:
+            if node.right == None:
+                node.right = Node(key, value)
+            else:
+                self._insert(node.right, key, value)
+
+    def insert(self, key: int, value: int) -> None:
+        if self.root == None:
+            self.root = Node(key, value)
+        else:
+            self._insert(self.root, key, value)
+
+    def _search(self, node: Node, key: int) -> Node:
+        if node == None: return None
+        if node.key == key: return node
+        return self._search(node.left) if key < node.left else self._search(node.right, key)
+
+    def _get_min(self, node: Node) -> Node:
+        if node == None: return None
+        if node.left == None: return node
+        return self._get_min(node.left)
+
+    def _get_max(self, node: Node) -> Node:
+        if node == None: return None
+        if node.right == None: return node
+        return self._get_max(node.right)
+
+    def _delete(self, node: Node, key: int) -> Node:
+        if node == None:
+            return None
+        elif key < node.key:
+            node.left = self._delete(node.left, key)
+        elif key > node.key:
+            node.right = self._delete(node.right, key)
+        else:
+            if node.left is None or node.right is None:
+                node = node.right if node.left == None else node.left
+            else:
+                max_in_left = self._get_max(node.left)
+                node.key = max_in_left.key
+                node.value = max_in_left.value
+                node.left = self._delete(node.left, max_in_left.key)
+
+        return node
+
+    def delete(self, key: int) -> Node:
+        self._delete(self.root, key)
+
+    def _print_sym_tree(self, node: Node) -> None:
+        if node == None: return
+        self._print_sym_tree(node.left)
+        print(node.value, end=' ')
+        self._print_sym_tree(node.right)
+
+    def print_sym_tree(self) -> None:
+        self._print_sym_tree(self.root)
+        print()
+
+    def print_tree(self, node=None, level=0, prefix="Root: "):
+        if node is None:
+            node = self.root
+        if node is not None:
+            print(" " * (level * 4) + prefix + str(node.key))
+            if node.left is not None or node.right is not None:
+                if node.left:
+                    self.print_tree(node.left, level + 1, "L--- ")
+                if node.right:
+                    self.print_tree(node.right, level + 1, "R--- ")
 
 
-    def preorder(self, node):
-        if node:
-            print(node.value)
-            preorder(node.left)
-            preorder(node.right)
+tree: Tree = Tree()
+tree.insert(7, 7)
+tree.insert(5, 5)
+tree.insert(6, 6)
+tree.insert(8, 8)
+tree.insert(4, 4)
+tree.insert(2, 2)
+tree.insert(3, 3)
+tree.print_sym_tree()
+tree.print_tree()
 
-    def postorder(self, node):
-        if node:
-            postorder(node.left)
-            postorder(node.right)
-            print(node.value)
+print()
+tree.delete(5)
+tree.print_sym_tree()
+tree.print_tree()
 
-    def inorder(self, node):
-        if node:
-            inorder(node.left)
-            print(node.value)
-            inorder(node.right)
+print('\nBad time')
+tree: Tree = Tree()
+for i in range(1, 11):
+    tree.insert(i, i)
+    tree.print_tree()
+    print()
 
+tree.print_sym_tree()
 
-root = Tree(1)
-root.left = Tree(2)
-root.right = Tree(3)
-root.left.right = Tree(4)
-
-preorder(root)
-inorder(root)
-postorder(root)
+print()
+tree.delete(8)
+tree.print_sym_tree()
+tree.print_tree()
 
 
 class BSTNode():

@@ -1,116 +1,137 @@
-class AVLNode:
-    def __init__(self, value):
-        self.value = value
-        self.right = None
-        self.left = None
-        self.height = 1
+class Node:
+    def __init__(self, key: int, value: int):
+        self.key: int = key
+        self.value: int = value
+        self.left: Node = None
+        self.right: Node = None
+        self.heigth: int = 0
 
 
-class  AVLTree:
-    def height(self, node):  # счет высоты
-        if not node:
-            return 0
-        return node.height
+class AVL_tree:
+    def __init__(self):
+        self.root: Node = None
 
-    def balance_factor(self, node: AVLNode):
-        if not node:
-            return 0
-        return 1 + self.height(node.right) - self.height(node.left)
+    def _update_heigth(node: Node) -> None:
+        node.heigth = max(AVL_tree.get_heigth(node.left), AVL_tree.get_heigth(node.right)) + 1
 
-    def update_height(self, node: AVLNode):  # пересчитываем высоты
-        if node:
-            node.height = 1 + max(self.height(node.left), self.height(node.right))
+    def get_heigth(node: Node) -> int:
+        return -1 if node is None else node.heigth
 
-    def rotate_right(self, z: AVLNode):
-        y: AVLNode = z.left
-        t3: AVLNode = y.right
+    def get_balance(node: Node) -> int:
+        return 0 if node is None else AVL_tree.get_heigth(node.right) - AVL_tree.get_heigth(node.left)
 
-        y.right = z  # вращаем
-        z.left = t3
+    def left_rotate(node: Node) -> Node:
+        right_child = node.right
+        node.right = right_child.left
+        right_child.left = node
+        AVL_tree._update_heigth(node)
+        AVL_tree._update_heigth(right_child)
+        return right_child
 
-        self.update(z)  # обновляем
-        self.update(y)
+    def right_rotate(node: Node) -> Node:
+        left_child = node.left
+        node.left = left_child.right
+        left_child.right = node
+        AVL_tree._update_heigth(node)
+        AVL_tree._update_heigth(left_child)
+        return left_child
 
-        return y
+    def balance(node: Node) -> Node:
+        balance_factor = AVL_tree.get_balance(node)
+        if balance_factor == -2:
+            if AVL_tree.get_balance(node.left) == 1:
+                node.left = AVL_tree.left_rotate(node.left)
+            return AVL_tree.right_rotate(node)
+        elif balance_factor == 2:
+            if AVL_tree.get_balance(node.right) == -1:
+                node.right = AVL_tree.right_rotate(node.right)
+            return AVL_tree.left_rotate(node)
+        return node
 
-    def rotate_left(self, y: AVLNode):
-        z: AVLNode = y.right
-        t2: AVLNode = z.left
+    def _insert(node: Node, key: int, value: int) -> Node:
+        if node is None:
+            return Node(key, value)
 
-        z.left = y
-        y.right = t2
-
-        self.update_height(y)
-        self.update_height(z)
-        return z
-
-    def insert(self, node: AVLNode, value):
-        # base insert
-        if not node:
-            return AVLNode(value)
-
-        if value < node.value:
-            node.left = self.insert(node.left, value)
-
-        elif value > node.value:
-            node.right = self.insert(node.right, value)
-
+        if key < node.key:
+            node.left = AVL_tree._insert(node.left, key, value)
+        elif key >= node.key:
+            node.right = AVL_tree._insert(node.right, key, value)
         else:
+            node.value = value
             return node
 
-        # update height
-        self.update_height(node)
+        AVL_tree._update_heigth(node)
+        return AVL_tree.balance(node)
 
-        # check balance
-        bf = self.balance_factor(node)
+    def insert(self, key, value) -> None:
+        self.root = AVL_tree._insert(self.root, key, value)
 
+    def _get_min(node: Node) -> Node:
+        if node == None: return None
+        if node.left == None: return node
+        return AVL_tree._get_min(node.left)
 
-        # rotate
-        if bf < -1 and value < node.left.value:
-            return self.rotate_right(node)
+    def _get_max(node: Node) -> Node:
+        if node == None: return None
+        if node.right == None: return node
+        return AVL_tree._get_max(node.right)
 
-        elif bf > -1 and value < node.right.value:
-            return self.rotate_left(node)
+    def _delete(node: Node, key: int) -> Node:
+        if node == None:
+            return None
+        elif key < node.key:
+            node.left = AVL_tree._delete(node.left, key)
+        elif key > node.key:
+            node.right = AVL_tree._delete(node.right, key)
+        else:
+            if node.left is None or node.right is None:
+                node = node.right if node.left == None else node.left
+            else:
+                max_in_left = AVL_tree._get_max(node.left)
+                node.key = max_in_left.key
+                node.value = max_in_left.value
+                node.left = AVL_tree._delete(node.left, max_in_left.key)
 
-        elif bf < -1 and value > node.left.value:
-            node.left = self.rotate_left(node.left)
-            return self.rotate_right(node)
-
-        elif bf > -1 and value < node.right.value:
-            node.right = self.rotate_right(node.right)
-            return self.rotate_left(node)
+        if not node is None:
+            AVL_tree._update_heigth(node)
+            node = AVL_tree.balance(node)
 
         return node
 
-    def inorder(self, node: AVLNode, result):
-        if node:
-            self.inorder(node.left, result)
-            result.append(node.value)
-            self.inorder(node.right, result)
+    def delete(self, key: int) -> Node:
+        self.root = AVL_tree._delete(self.root, key)
 
-    def print_tree_horizontal(self, root, level, prefix="root: "):
-        if root is not None:
-            print(" " * (level * 4) + prefix + str(root.value))
-            if root.left:
-                print_tree_horizontal(root.left, level+1, "L---")
-            else:
-                print(" " * ((level + 1) * 4) + 'L--- None')
-            if root.right:
-                print_tree_horizontal(root.right, level+1, "R---")
-            else:
-                print(" " * ((level + 1) * 4) + 'R--- None')
+    def _print_sym_tree(self, node: Node) -> None:
+        if node == None: return
+        self._print_sym_tree(node.left)
+        print(node.value, end=' ')
+        self._print_sym_tree(node.right)
 
+    def print_sym_tree(self) -> None:
+        self._print_sym_tree(self.root)
+        print()
 
-tree = AVLTree()
-root = None
-for v in [10, 20, 30, 40, 50, 25]:
-    root = tree.insert(root, v)
-
-result = []
-tree.inorder(root, result)
-print(f'inorder: {result}')
-
-print_tree_horizontal(root)
+    def print_tree(self, node=None, level=0, prefix="Root: "):
+        if node is None:
+            node = self.root
+        if node is not None:
+            print(" " * (level * 4) + prefix + str(node.key))
+            if node.left is not None or node.right is not None:
+                if node.left:
+                    self.print_tree(node.left, level + 1, "L--- ")
+                if node.right:
+                    self.print_tree(node.right, level + 1, "R--- ")
 
 
-# минхип на основе красночерного дерева -- это задание на звездочку
+tree: AVL_tree = AVL_tree()
+for i in range(1, 11):
+    tree.insert(i, i)
+    tree.print_tree()
+    print()
+
+tree.print_sym_tree()
+
+print()
+tree.delete(8)
+tree.print_sym_tree()
+tree.print_tree()
